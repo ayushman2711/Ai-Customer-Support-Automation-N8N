@@ -1,0 +1,692 @@
+{
+  "name": "Customer Support Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Classify the sentiment in the following customer feedback: {{ $('On form submission').item.json['Message Text'] }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        -1120,
+        -1024
+      ],
+      "id": "c8c92d2c-2ba4-4936-b580-035ad35c9549",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -1088,
+        -720
+      ],
+      "id": "fc9e00d9-dece-4745-8386-25b7f542e73a",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "tkbT73pYk9HAwsmQ",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -384,
+        -848
+      ],
+      "id": "a123ee9a-29dc-46a3-9069-30aa21a251fa",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=write a consise email response without a subjectline, to the feedback provided in the customer feedback form: {{ $json['Message Text'] }}\n\nFor Positive Feedback ([{{ $json.text }}]): Craft a short, warm email thanking the customer {{ $json.Name }} for taking the time to share their thoughts. Express genuine appreciation for their support.\n\nFor Negative Feedback ([{{ $json.text }}]):\nWrite a thoughtful, emphathetic email thanking the customer \n{{ $json.Name }} for their valuable input. Show sincere interest in their persepective by asking how can we improve our services or products. Aditionally , include a special offer code for a 20% discount on their purchase as a gesture of goodwill.\n\nAlways conclude the email with the signature of the Founder and CEO:\n\"The AI Agent Guy\".",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        288,
+        -1008
+      ],
+      "id": "79a3b444-d7c1-40fe-8ced-b5c6477bd257",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        192,
+        -736
+      ],
+      "id": "ed2e24b9-31c1-4b83-b966-d2b74a79311c",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "tkbT73pYk9HAwsmQ",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "Thank you for your feedback",
+        "emailType": "text",
+        "message": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        -96
+      ],
+      "id": "938ceccd-0580-4dad-bcfe-bf57cc4f46e7",
+      "name": "Send a message",
+      "webhookId": "7b1bc577-d367-4dd6-a86f-a3b5484daaf0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "K0vgBmCHQ9U3lsks",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Customer Support",
+        "formDescription": "Please Write your feedback or Query regarding our Company products and services",
+        "formFields": {
+          "values": [
+            {
+              "fieldName": "Name",
+              "fieldLabel": "Enter Your Name",
+              "requiredField": true
+            },
+            {
+              "fieldName": "Support Type",
+              "fieldLabel": "What Support You needed",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Query"
+                  },
+                  {
+                    "option": "Feedback"
+                  }
+                ]
+              },
+              "requiredField": true
+            },
+            {
+              "fieldName": "Support Category",
+              "fieldLabel": "Text Regarding ",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Product"
+                  },
+                  {
+                    "option": "Services"
+                  },
+                  {
+                    "option": "Other"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldName": "Message Text",
+              "fieldLabel": "Describe Your Feedback or Query",
+              "fieldType": "textarea",
+              "requiredField": true
+            },
+            {
+              "fieldName": "Email",
+              "fieldLabel": "Enter your email address",
+              "placeholder": "Email",
+              "requiredField": true
+            },
+            {
+              "fieldName": "Contact",
+              "fieldLabel": "Enter your whatsapp number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.4,
+      "position": [
+        -1520,
+        -464
+      ],
+      "id": "839d3317-1ec3-41f4-a848-21a99e546282",
+      "name": "On form submission",
+      "webhookId": "1c678cd2-9767-461c-a3da-c61e81814add"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "a995e13e-dc77-40c7-a7de-806bfce94773",
+              "leftValue": "={{ $json['Support Type'] }}",
+              "rightValue": "Feedback",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1232,
+        -336
+      ],
+      "id": "91b8ca96-4f2f-489c-a373-b8be119be89a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a customer support assistant. you dont need specific details about the company, its just a hypothetical case that you are addressing the customers query , so whatever will be the query is there , you just have to provide a solution like a real business scenario.\nGenerate a text like a email which can be sent directly to the email and whatsapp also at the same time.\n\nCustomer Name:{{ $('On form submission').item.json.Name }} \nCustomer Email: {{ $json.Email }}\nSupport Category: {{ $('On form submission').item.json['Support Type'] }}\nCustomer Query: {{ $('On form submission').item.json['Message Text'] }}\n\nProvide a clear, professional, and helpful solution to the customer's query.\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.8,
+      "position": [
+        -1120,
+        -96
+      ],
+      "id": "b2da31df-8ffa-4b48-812e-4e4d40aeed06",
+      "name": "Basic LLM Chain2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -960,
+        96
+      ],
+      "id": "5d48dd16-dda3-4951-953f-a31ebb3f49af",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "tkbT73pYk9HAwsmQ",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -384,
+        -528
+      ],
+      "id": "d5835bc6-f34d-406a-83c2-d944f9d18db3",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1TXM-J91yYCAt99YMeNyD97n1lJg46xfFT8gx3ieBeJE/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TXM-J91yYCAt99YMeNyD97n1lJg46xfFT8gx3ieBeJE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.Name }}",
+            "Email": "={{ $json.Email }}",
+            "Contact": "={{ $json.Contact }}",
+            "Support Type": "={{ $json['Support Type'] }}",
+            "Support Category": "={{ $json['Support Category'] }}",
+            "Message Text": "={{ $json['Message Text'] }}",
+            "Sentiment": "={{ $('Basic LLM Chain').item.json.text }}",
+            "Submitted At": "={{ $json.submittedAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Support Type",
+              "displayName": "Support Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Support Category",
+              "displayName": "Support Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message Text",
+              "displayName": "Message Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sentiment",
+              "displayName": "Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Submitted At",
+              "displayName": "Submitted At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        -528
+      ],
+      "id": "48766b2f-11b6-47a8-a634-345fb43e5d4e",
+      "name": "Feedback Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FeMlczvZKLBR2JcW",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1TXM-J91yYCAt99YMeNyD97n1lJg46xfFT8gx3ieBeJE/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1TXM-J91yYCAt99YMeNyD97n1lJg46xfFT8gx3ieBeJE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.Name }}",
+            "Email": "={{ $json.Email }}",
+            "Contact": "={{ $json.Contact }}",
+            "Support Type": "={{ $json['Support Type'] }}",
+            "Support Category": "={{ $json['Support Category'] }}",
+            "Message Text": "={{ $json['Message Text'] }}",
+            "Submitted At": "={{ $json.submittedAt }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Support Type",
+              "displayName": "Support Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Support Category",
+              "displayName": "Support Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message Text",
+              "displayName": "Message Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sentiment",
+              "displayName": "Sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Submitted At",
+              "displayName": "Submitted At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        192,
+        -224
+      ],
+      "id": "315d29b6-a8ac-4cfb-9c06-ff595d16bd2b",
+      "name": "Query sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "FeMlczvZKLBR2JcW",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Feedback Sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain2": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Query sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Feedback Sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "54530fc6-01fb-4c5a-9e0a-8dc6d766e0f4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3b4aa42d23cd8818b2a2fe1a26e11b42297007dfa363f590936abdd4c945602d"
+  },
+  "id": "MbnDtaDUJwRIVxvc",
+  "tags": []
+}
